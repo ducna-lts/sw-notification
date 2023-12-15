@@ -92,6 +92,11 @@
      * @public
      */
     webNotification.allowRequest = true; //true to enable automatic requesting of permissions if needed
+    Object.defineProperty(webNotification, 'isSuported', {
+        get: function getSuport() {
+            return NotificationAPI && NotificationAPI.permission;
+        }
+    });
 
     /*eslint-disable func-name-matching*/
     Object.defineProperty(webNotification, 'permissionGranted', {
@@ -104,6 +109,9 @@
          * @returns {Boolean} True if permission is granted, else false
          */
         get: function getPermission() {
+            if (!webNotification.isSuported) {
+                return false;
+            }
             const permission = NotificationAPI.permission;
 
             /**
@@ -165,6 +173,9 @@
      * @param {ShowNotificationCallback} callback - Invoked with either an error or the hide notification function
      */
     const createAndDisplayNotification = function (title, options, callback) {
+        if (!webNotification.isSuported) {
+            return;
+        }
         let autoClose = 0;
         if (options.autoClose && (typeof options.autoClose === 'number')) {
             autoClose = options.autoClose;
@@ -293,6 +304,10 @@
      * ```
      */
     webNotification.requestPermission = function (callback) {
+        if (!webNotification.isSuported) {
+            callback(false);
+            return;
+        }
         if (callback && typeof callback === 'function') {
             if (isEnabled()) {
                 callback(true);
@@ -381,6 +396,9 @@
      */
     webNotification.showNotification = function () {
         //convert to array to enable modifications
+        if (!webNotification.isSuported) {
+                return;
+        }
         const argumentsArray = Array.prototype.slice.call(arguments, 0);
 
         if ((argumentsArray.length >= 1) && (argumentsArray.length <= 3)) {
@@ -403,3 +421,4 @@
 
     return webNotification;
 }));
+
